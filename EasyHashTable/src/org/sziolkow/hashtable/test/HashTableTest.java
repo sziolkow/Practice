@@ -30,10 +30,29 @@ public class HashTableTest {
 	public void putFiveNewObject() {
 		IEasyHashTable easyHashTable = new EasyHashTable();
 		assertTrue(easyHashTable.put(new Integer(1), new Integer(1)));
+		assertTrue(easyHashTable.put(new Integer(1), new Integer(1)));
+		assertTrue(easyHashTable.put(new Integer(1), new Integer(1)));
 		assertTrue(easyHashTable.put(new Integer(2), new Integer(2)));
 		assertTrue(easyHashTable.put(new Integer(3), new Integer(3)));
 		assertTrue(easyHashTable.put(new Integer(4), new Integer(4)));
 		assertTrue(easyHashTable.put(new Integer(5), new Integer(5)));
+	}
+	
+	
+	@Test
+	public void putAnotherFiveNewObject() {
+		IEasyHashTable easyHashTable = new EasyHashTable();
+		easyHashTable.put(new Integer(1), new Integer(1));
+		easyHashTable.put(new Integer(1), new Integer(1));
+		easyHashTable.put(new Integer(1), new Integer(1));
+		easyHashTable.put(new Integer(2), new Integer(2));
+		easyHashTable.put(new Integer(3), new Integer(3));
+		easyHashTable.put(new Integer(4), new Integer(4));
+		assertEquals(new Integer(1), easyHashTable.get(new Integer(1)));
+		assertEquals(new Integer(2), easyHashTable.get(new Integer(2)));
+		assertEquals(new Integer(3), easyHashTable.get(new Integer(3)));
+		assertEquals(new Integer(4), easyHashTable.get(new Integer(4)));
+		assertEquals(new Integer(3), easyHashTable.get(new Integer(3)));
 	}
 	
 	@Test
