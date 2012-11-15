@@ -4,6 +4,7 @@ import org.sziolkow.hashtable.IEasyHashTable;
 
 public class EasyHashTable implements IEasyHashTable {
     
+	private static final double FULFILLMENT_FACTOR = 0.75;
 	private static final int INITIAL_NUMBER_OF_BUCKETS = 2;
 	private static final int INITAL_SIZE_OF_HASH_TABLE = 2;
 	
@@ -15,45 +16,68 @@ public class EasyHashTable implements IEasyHashTable {
 	}
 	
 	public boolean put(Object key, Object value) {
-		 int index = countIndex(key,hashArray.length);
-		 KeyValue keyValue =  new KeyValue(key, value);
-		 KeyValue[] keyValueArray = hashArray[index];
-		 keyValueArray = getBuckets(keyValueArray);
-		 hashArray[index] = keyValueArray;
-		 for (int i = 0; i < keyValueArray.length; i++) {
-			 if (keyValueArray[i] ==null) {
-				 keyValueArray[i] = keyValue;
+		 int index = calculateIndexForHashTable(key,hashArray.length);
+		 KeyValue newBucket =  new KeyValue(key, value);
+		 KeyValue[] bucketsForIndex = hashArray[index];
+		 
+		 if (!checkIfEmptyBuckets(bucketsForIndex)) {
+			 bucketsForIndex=expandNumberOfBuckets(bucketsForIndex);
+			 hashArray[index] = bucketsForIndex;
+		 }
+
+		 addNewBucket(newBucket, bucketsForIndex);
+		
+         if (isHashTableToExpand()) {
+        	 hashArray=expandAndRehash();
+         }
+		 return true;
+	}
+	
+	private boolean isHashTableToExpand() {
+		if (numberOfPuts/hashArray.length>FULFILLMENT_FACTOR) return true;
+		return false;
+	}
+
+	private void addNewBucket(KeyValue newBucket, KeyValue[] bucketList) {
+		 for (int i = 0; i < bucketList.length; i++) {
+			 if (bucketList[i] ==null) {
+				 bucketList[i] = newBucket;
 				 if (i==0) numberOfPuts++;
 				 break;
 			 }	
 		 }
-		 if (numberOfPuts/hashArray.length>0.75) {
-			 expandAndRehash();
-		 }
-		 return true;
+		
 	}
-	
-	
-	private KeyValue[] getBuckets(KeyValue[] keyValueArray) {
-		int indexToCheck = keyValueArray.length-1;
+
+	private boolean checkIfEmptyBuckets(KeyValue[] buckets) {
+		boolean retValue = false;
+		int indexToCheck = buckets.length-1;
 		if (indexToCheck<0) indexToCheck = 0;
 		
-		if (keyValueArray[indexToCheck]!=null) {
-			return expandNumberOfBuckets(keyValueArray);
+		if (buckets[indexToCheck]==null) {
+			retValue = true;
 		}
-		return keyValueArray;	
+		return retValue;
+	}
+
+	private int calculateIndexForHashTable(Object key, int length) {
+		int index = key.hashCode() % length;
+		if (index < 0)  index=-index;
+		return index;
 	}
 	
-	private void expandAndRehash() {
+	
+	
+	private KeyValue[][] expandAndRehash() {
 		KeyValue newHashArray[][] =  new KeyValue[hashArray.length+INITAL_SIZE_OF_HASH_TABLE][1];
 		for (int i = 0; i < hashArray.length; i++) {
 			KeyValue[] row = hashArray[i];
-			int newIndex=countIndex(row[0].getKey(),newHashArray.length);
+			int newIndex=calculateIndexForHashTable(row[0].getKey(),newHashArray.length);
 			newHashArray[newIndex] = row;	
 			hashArray[i] = null;
 		}
 		
-		hashArray=newHashArray;
+		return newHashArray;
 	}
 
 
@@ -69,7 +93,7 @@ public class EasyHashTable implements IEasyHashTable {
 	public Object get(Object key) {
 		Object retValue =null;
 		if (key!=null) {
-			int index = countIndex(key,hashArray.length);
+			int index = calculateIndexForHashTable(key,hashArray.length);
 			KeyValue[] keyValueArray = hashArray[index];
 			for (int i = 0; i < keyValueArray.length; i++) {
 				Object tempKey = keyValueArray[i].getKey();
@@ -82,10 +106,5 @@ public class EasyHashTable implements IEasyHashTable {
 		return retValue;
 	}
 	
-	private int countIndex(Object key, int length) {
-		int index = key.hashCode() % length;
-		if (index < 0)  index=-index;
-		return index;
-	}
 
 }

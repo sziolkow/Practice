@@ -23,6 +23,4 @@ public class KeyValue {
 		this.value = value;
 	}
 	
-	
-
 }
